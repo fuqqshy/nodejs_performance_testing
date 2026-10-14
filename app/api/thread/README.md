@@ -1,56 +1,58 @@
+## Synchronous Performance Testing -- Stress Test
 
-## 同步读取--压力测试
+### Execution
+First, build and start the Next.js application:
 
-
-
-### 压测执行
-首先，将nextjs 构建
 ```
 npm run build && npm run start
 
 ```
-如果没有安装utocannon，请先执行 npm -g utocannon
-```
-// 终端中执行
-//例如： sign_base 直接在主线程中创建token
-autocannon -m POST -c 1000 -d 10 -H "content-type=application/json" -b "{\"email\":\"test@gmail.com\",\"password\":\"12345\"}" "http://localhost:3000/api/thread/sync?type=sign_base"
 
-// sign_thread 每次创建新thread
-autocannon -m POST -c 1000 -d 10 -H "content-type=application/json" -b "{\"email\":\"test@gmail.com\",\"password\":\"12345\"}" "http://localhost:3000/api/thread/sync?type=sign_thread"
-
-// sign_thread_poll 创建线程池
-autocannon -m POST -c 1000 -d 10 -H "content-type=application/json" -b "{\"email\":\"test@gmail.com\",\"password\":\"12345\"}" "http://localhost:3000/api/thread/sync?type=sign_thread_poll"
-
-// big_data_sync 同步读取大数据（假设需要200ms的等待时间）
-autocannon -m POST -c 1000 -d 10 -H "content-type=application/json" -b "{\"email\":\"test@gmail.com\",\"password\":\"12345\"}" "http://localhost:3000/api/thread/sync?type=big_data_sync"
-
-// big_data_thread_poll 使用线程池读取大数据（假设需要等待200ms）
-autocannon -m POST -c 1000 -d 10 -H "content-type=application/json" -b "{\"email\":\"test@gmail.com\",\"password\":\"12345\"}" "http://localhost:3000/api/thread/sync?type=big_data_thread_poll"
-
+If autocannon is not installed, please execute `npm install -g autocannon` first.
 
 ```
+// Execute in the terminal
+// Example: sign_base creates tokens directly in the main thread
+autocannon -m POST -c 1000 -d 10 -H "content-type=application/json" -b "{"email":"test@gmail.com","password":"12345"}" "http://localhost:3000/api/thread/sync?type=sign_base"
 
-## 异步步读取--压力测试
+// sign_thread creates a new thread for each request
+autocannon -m POST -c 1000 -d 10 -H "content-type=application/json" -b "{"email":"test@gmail.com","password":"12345"}" "http://localhost:3000/api/thread/sync?type=sign_thread"
 
-同样，执行
+// sign_thread_poll creates a thread pool
+autocannon -m POST -c 1000 -d 10 -H "content-type=application/json" -b "{"email":"test@gmail.com","password":"12345"}" "http://localhost:3000/api/thread/sync?type=sign_thread_poll"
+
+// big_data_sync synchronously reads big data (assuming a 200ms wait time)
+autocannon -m POST -c 1000 -d 10 -H "content-type=application/json" -b "{"email":"test@gmail.com","password":"12345"}" "http://localhost:3000/api/thread/sync?type=big_data_sync"
+
+// big_data_thread_poll uses a thread pool to read big data (assuming a 200ms wait time)
+autocannon -m POST -c 1000 -d 10 -H "content-type=application/json" -b "{"email":"test@gmail.com","password":"12345"}" "http://localhost:3000/api/thread/sync?type=big_data_thread_poll"
+
+
+```
+
+## Asynchronous Performance Testing -- Stress Test
+
+Similarly, execute:
+
 ```
 npm run build && npm run start
 
 ```
-而后，分为nodejs本身io读取和使用线程池读取两个大分类， 每个分类又分为模拟固定时长的sleep，和读取文件的操作。 
+Then, the tests are divided into two main categories: Node.js native asynchronous I/O read and thread pool read. Each category is further split into simulating a fixed-duration sleep and performing actual file read operations.
 
 ```
-// 终端中执行
-// 测试A： 主线程异步IO
+
+// Execute in the terminal
+// Test A: Main thread asynchronous I/O
 autocannon -m POST -c 1000 -d 10 -H "content-type=application/json" -b "{\"email\":\"test@gmail.com\",\"password\":\"12345\"}" "http://localhost:3000/api/thread/async?type=io_main&mode=timer"
 
-// 测试B： 线程池异步IO
+// Test B: Thread pool asynchronous I/O
 autocannon -m POST -c 1000 -d 10 -H "content-type=application/json" -b "{\"email\":\"test@gmail.com\",\"password\":\"12345\"}" "http://localhost:3000/api/thread/async?type=io_pool&mode=timer"
 
-// 测试C: 主线程异步读取文件
+// Test C: Main thread asynchronous file read
 autocannon -m POST -c 1000 -d 10 -H "content-type=application/json" -b "{\"email\":\"test@gmail.com\",\"password\":\"12345\"}" "http://localhost:3000/api/thread/async?type=io_main&mode=file"
 
-// 测试D: 线程池异步读取文件
+// Test D: Thread pool asynchronous file read
 autocannon -m POST -c 1000 -d 10 -H "content-type=application/json" -b "{\"email\":\"test@gmail.com\",\"password\":\"12345\"}" "http://localhost:3000/api/thread/async?type=io_pool&mode=file"
 
 ```
